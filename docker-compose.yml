@@ -17,7 +17,7 @@ services:
       - ~/.conan:/home/${USERNAME:-devuser}/.conan
     user: "${USER_UID}:${USER_GID}"
     # command: sleep infinity
-    # working_dir: /workspace
+    working_dir: /workspace
     environment:
       - TZ=UTC
     command: ["/bin/bash"]
@@ -25,5 +25,5 @@ services:
     tty: true
     env_file:
       - .devcontainer/dev.env
-    profiles:
-      - dev
+    # profiles:
+    #   - dev

@@ -1,0 +1,28 @@
+{
+  "name": "C++ Dev",
+  "dockerComposeFile": "../docker-compose.yml",
+  "service": "dev",
+  "workspaceFolder": "/workspace",
+  "remoteUser": "${localEnv:USERNAME}",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "vadimcn.vscode-lldb",
+        "ms-vscode.cmake-tools",
+        "llvm-vs-code-extensions.vscode-clangd",
+        "github.copilot",
+        "ms-azuretools.vscode-docker"
+      ],
+      "settings": {
+        "terminal.integrated.shell.linux": "bash",
+        "clangd.path": "/usr/bin/clangd-19"
+      }
+    }
+  },
+  "features": {},
+  "mounts": [
+    "source=devcontainer-data,target=/home/${localEnv:USERNAME}/.vscode-server,type=volume"
+  ],
+  "postCreateCommand": "echo 'Welcome to the C++ Dev Container!'",
+  "shutdownAction": "stopCompose"
+}

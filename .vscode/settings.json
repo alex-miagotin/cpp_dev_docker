@@ -1,0 +1,7 @@
+{
+  "cmake.generator": "Ninja",
+  "cmake.configureOnOpen": true,
+  "clangd.arguments": [
+    "--compile-commands-dir=${workspaceFolder}/build/dev"
+  ]
+}

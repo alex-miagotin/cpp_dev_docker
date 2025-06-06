@@ -1,0 +1,16 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "(lldb) Syntax Controller",
+      "program": "${workspaceFolder}/build/dev/bin/your_app_executable",
+      "args": [
+          "-u",
+          "1000"
+      ],
+      "cwd": "${fileDirname}"
+    }
+  ]
+}

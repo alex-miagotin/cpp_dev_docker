@@ -1,0 +1,29 @@
+services:
+  dev:
+    # docker compose --profile dev up --build --remove-orphans --detach
+    # docker compose down --profile dev
+    # code --folder-uri "vscode-remote://attached-container+dev_container/workspace"
+    container_name: dev_container
+    image: ${IMAGE_NAME:-devcontainer}:latest
+    build:
+      context: .
+      dockerfile: .devcontainer/Dockerfile.dev
+      args:
+        USERNAME: ${USERNAME:-devuser}
+        USER_UID: ${USER_UID:-1000}
+        USER_GID: ${USER_GID:-1000}
+    volumes:
+      - ./:/workspace:cached
+      - ~/.conan:/home/${USERNAME:-devuser}/.conan
+    user: "${USER_UID}:${USER_GID}"
+    # command: sleep infinity
+    # working_dir: /workspace
+    environment:
+      - TZ=UTC
+    command: ["/bin/bash"]
+    stdin_open: true
+    tty: true
+    env_file:
+      - .devcontainer/dev.env
+    profiles:
+      - dev

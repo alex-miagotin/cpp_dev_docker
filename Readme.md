@@ -1,38 +1,123 @@
+# C++ Dev Container
+
+A ready-to-use **C++20 development environment in Docker**: Ubuntu, a current CMake, clang tooling, Conan and Ninja, wired to VS Code through Dev Containers. Clone it, start the container, and build a Conan + CMake project without installing a toolchain on the host.
+
+![C++20](https://img.shields.io/badge/C%2B%2B-20-00599C?logo=cplusplus&logoColor=white)
+![CMake](https://img.shields.io/badge/build-CMake%20%2B%20Ninja-064F8C?logo=cmake&logoColor=white)
+![Conan](https://img.shields.io/badge/deps-Conan%202-6699CB?logo=conan&logoColor=white)
+![Docker](https://img.shields.io/badge/env-Docker%20Compose-2496ED?logo=docker&logoColor=white)
+
+## Contents
+
+- [What is inside](#what-is-inside)
+- [Repository layout](#repository-layout)
+- [Quick start](#quick-start)
+- [Build the sample project](#build-the-sample-project)
+- [Use it for your own project](#use-it-for-your-own-project)
+- [Useful commands](#useful-commands)
+- [Troubleshooting](#troubleshooting)
+- [Roadmap](#roadmap)
+
+## What is inside
+
+| Component | Details |
+|---|---|
+| Base image | Ubuntu 22.04 |
+| Compilers and build | `g++` / `gcc`, `build-essential`, Ninja, CMake from the Kitware apt repository |
+| Clang tooling | LLVM 19 with `clangd` (symlinked to `/usr/bin/clangd`) |
+| Dependencies | Conan 2 (installed with pip); the sample uses `fmt` |
+| Editor | VS Code Dev Container with clangd, CodeLLDB, CMake Tools and Docker extensions |
+| User | A non-root user that matches your host UID and GID, with passwordless `sudo` |
+| Mounts | The repository at `/workspace`, and your host `~/.conan` cache |
+
+## Repository layout
+
 ```
 .
 ├── .devcontainer/
-│   ├── devcontainer.json
-│   └── Dockerfile.dev
-|   |__ dev.env
-├── docker-compose.yml
-├── CMakeLists.txt
-├── conanfile.txt
-└── src/
-    └── main.cpp
+│   ├── devcontainer.json   # VS Code Dev Container definition
+│   ├── Dockerfile.dev      # image with the toolchain
+│   └── dev.env             # user and group passed into the container
+├── docker-compose.yml      # the `dev` service
+├── CMakeLists.txt          # sample project
+├── CMakePresets.json       # `dev` (Debug) and `prod` (Release) presets
+├── conanfile.txt           # sample dependency: fmt
+├── scripts/build.sh        # dev build in one command
+└── src/main.cpp            # hello-world using fmt
 ```
 
-### 🚀 How to use it
+## Quick start
 
-1. Build your dev container:
-```
-export UID=$(id -u)
-export GID=$(id -g)
-docker compose --profile dev up --build --remove-orphans --detach
-```
-```
+Prerequisites: Docker with the Compose plugin, and VS Code with the Dev Containers extension (or the Dev Containers CLI).
+
+**1. Start the container**
+
+```bash
 USER_UID=$(id -u) USER_GID=$(id -g) docker compose --profile dev up --build --remove-orphans --detach
 ```
+
+The container is named `dev_container`. Passing `USER_UID` and `USER_GID` makes files created inside it belong to your host user.
+
+**2. Attach an editor**
+
+- **VS Code:** open the folder and choose *Reopen in Container*; it attaches to the running service.
+- **Dev Containers CLI:**
+  ```bash
+  npm install -g @devcontainers/cli
+  devcontainer up --workspace-folder .
+  code --folder-uri "vscode-remote://attached-container+dev_container/workspace"
+  ```
+
+**3. Work in the container terminal.** The workspace is `/workspace`.
+
+## Build the sample project
+
+Inside the container:
+
+```bash
+conan profile detect --force
+
+# Debug
+conan install . --output-folder=build/dev --build=missing -s build_type=Debug -c tools.cmake.cmaketoolchain:generator=Ninja
+cmake --preset=dev
+cmake --build --preset=build-dev
+
+# Release
+conan install . --output-folder=build/prod --build=missing -s build_type=Release -c tools.cmake.cmaketoolchain:generator=Ninja
+cmake --preset=prod
+cmake --build --preset=build-prod
 ```
-npm install -g @devcontainers/cli
-devcontainer up --workspace-folder .
-code --folder-uri "vscode-remote://attached-container+%dev_container%/workspace"
+
+`scripts/build.sh` runs the Debug sequence. The executable is written to `build/<preset>/bin/`, for example `build/dev/bin/your_app_executable`.
+
+## Use it for your own project
+
+The sample is a template, so rename the placeholders before you start:
+
+- In `CMakeLists.txt`, change the project name `MyAwesomeApp` and the target `your_app_executable`.
+- Add your dependencies to `conanfile.txt`.
+- `CMakeLists.txt` links statically (`-static`); remove that flag if you need dynamic linking.
+
+## Useful commands
+
+```bash
+docker compose ps
+docker compose logs
+docker compose down --remove-orphans
 ```
+
+## Troubleshooting
+
+**VS Code fails to connect with `TypeError: Cannot read properties of undefined (reading 'parentAuthority')`**
+
 ```
-# vscode issue
 [72 ms] Start: Resolving Remote
 [83 ms] TypeError: Cannot read properties of undefined (reading 'parentAuthority')
+```
 
-# solution
+This appears with the snap build of VS Code. Replace it with the package from Microsoft's apt repository:
+
+```bash
 sudo snap remove code
 wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
 sudo install -o root -g root -m 644 microsoft.gpg /etc/apt/trusted.gpg.d/
@@ -40,43 +125,14 @@ sudo sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/vscode s
 sudo apt update
 sudo apt install code
 ```
-2. Open folder in VSCode → it will auto attach to container.
 
-3. In VSCode Terminal:
-```
-conan profile detect --force
-# DEV
-conan install . --output-folder=build/dev --build=missing -s build_type=Debug -c tools.cmake.cmaketoolchain:generator=Ninja
-cmake --preset=dev
-cmake --build --preset=build-dev
+## Roadmap
 
-# RELEASE
-conan install . --output-folder=build/prod --build=missing -s build_type=Release -c tools.cmake.cmaketoolchain:generator=Ninja
-cmake --preset=prod
-cmake --build --preset=build-prod
-```
-4. For production build:
-```
-TODO:
-docker compose --profile prod up --build
-```
-
-### Useful commands
-- `docker-compose ps`
-- `docker-compose logs`
-- `docker-compose down --remove-orphans`
-
-### 📦 TODO: Part 1 — Multi-Arch Docker Build (x86_64 + ARM64)
-1. Install buildx (if not yet)
-```
-docker buildx create --use
-docker buildx inspect --bootstrap
-```
-2. Build multi-arch image
-```
-docker buildx build --platform linux/amd64,linux/arm64 -t your-image-name:latest .
-OR
-docker compose --profile prod build
-```
-- For ARM64, you can even push to DockerHub: --push
-
+- **Production image:** `docker compose --profile prod up --build` (the `prod` profile is not defined yet).
+- **Multi-architecture build (x86_64 and ARM64):**
+  ```bash
+  docker buildx create --use
+  docker buildx inspect --bootstrap
+  docker buildx build --platform linux/amd64,linux/arm64 -t your-image-name:latest .
+  ```
+  Add `--push` to publish to a registry.

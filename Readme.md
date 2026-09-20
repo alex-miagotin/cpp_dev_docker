@@ -17,6 +17,7 @@ A ready-to-use **C++20 development environment in Docker**: Ubuntu, a current CM
 - [Useful commands](#useful-commands)
 - [Troubleshooting](#troubleshooting)
 - [Roadmap](#roadmap)
+- [License](#license)
 
 ## What is inside
 
@@ -138,3 +139,7 @@ sudo apt install code
   docker buildx build --platform linux/amd64,linux/arm64 -t your-image-name:latest .
   ```
   Add `--push` to publish to a registry.
+
+## License
+
+Released under the [MIT License](LICENSE).

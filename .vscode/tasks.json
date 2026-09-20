@@ -10,13 +10,6 @@
         "isDefault": true
       },
       "problemMatcher": []
-    },
-    {
-      "label": "Docker Build Prod",
-      "type": "shell",
-      "command": "docker compose --profile prod up --build",
-      "group": "build",
-      "problemMatcher": []
-    },
+    }
   ]
 }

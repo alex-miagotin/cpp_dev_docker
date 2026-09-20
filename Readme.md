@@ -88,13 +88,15 @@ cmake --preset=prod
 cmake --build --preset=build-prod
 ```
 
-`scripts/build.sh` runs the Debug sequence. The executable is written to `build/<preset>/bin/`, for example `build/dev/bin/your_app_executable`.
+`scripts/build.sh` runs the Debug sequence. The executable is written to `build/<preset>/bin/`, for example `build/dev/bin/hello_cpp`.
 
 ## Use it for your own project
 
-The sample is a template, so rename the placeholders before you start:
+The sample is a template. Its project and executable are both named `hello_cpp`; rename them for your project:
 
-- In `CMakeLists.txt`, change the project name `MyAwesomeApp` and the target `your_app_executable`.
+- In `CMakeLists.txt`, change `project(hello_cpp)` and the `hello_cpp` target.
+- In `.vscode/launch.json`, update the debug configuration's `program` path.
+- In `scripts/build.sh`, update the path in the trailing comment.
 - Add your dependencies to `conanfile.txt`.
 - `CMakeLists.txt` links statically (`-static`); remove that flag if you need dynamic linking.
 
